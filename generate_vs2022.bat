@@ -7,6 +7,52 @@ echo Minizip-ng Visual Studio 2022 Generator
 echo ========================================
 echo.
 
+REM Check current path length
+set CURRENT_PATH=%CD%
+call :strlen result CURRENT_PATH
+if %result% GTR 80 (
+    echo WARNING: Current path is very long ^(%result% characters^)
+    echo.
+    echo Windows has a 260-character path limit which may cause build issues.
+    echo Current path: %CD%
+    echo.
+    echo RECOMMENDED: Move this project to a shorter path, such as:
+    echo   C:\minizip-ng
+    echo   C:\dev\minizip-ng
+    echo   D:\projects\minizip-ng
+    echo.
+    choice /C YN /M "Do you want to continue anyway"
+    if errorlevel 2 (
+        echo.
+        echo Please move the project to a shorter path and try again.
+        pause
+        exit /b 1
+    )
+    echo.
+)
+
+goto :main
+
+:strlen <resultVar> <stringVar>
+(
+    setlocal EnableDelayedExpansion
+    set "s=!%~2!#"
+    set "len=0"
+    for %%P in (4096 2048 1024 512 256 128 64 32 16 8 4 2 1) do (
+        if "!s:~%%P,1!" NEQ "" (
+            set /a "len+=%%P"
+            set "s=!s:~%%P!"
+        )
+    )
+)
+(
+    endlocal
+    set "%~1=%len%"
+    exit /b
+)
+
+:main
+
 REM Check if CMake is installed
 where cmake >nul 2>nul
 if %errorlevel% neq 0 (

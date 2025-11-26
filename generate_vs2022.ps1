@@ -6,6 +6,31 @@ Write-Host "Minizip-ng Visual Studio 2022 Generator"
 Write-Host "========================================"
 Write-Host ""
 
+# Check current path length
+$currentPath = Get-Location
+$pathLength = $currentPath.Path.Length
+
+if ($pathLength -gt 80) {
+    Write-Host "WARNING: Current path is very long ($pathLength characters)" -ForegroundColor Yellow
+    Write-Host ""
+    Write-Host "Windows has a 260-character path limit which may cause build issues."
+    Write-Host "Current path: $currentPath"
+    Write-Host ""
+    Write-Host "RECOMMENDED: Move this project to a shorter path, such as:" -ForegroundColor Yellow
+    Write-Host "  C:\minizip-ng"
+    Write-Host "  C:\dev\minizip-ng"
+    Write-Host "  D:\projects\minizip-ng"
+    Write-Host ""
+    $response = Read-Host "Do you want to continue anyway? (Y/N)"
+    if ($response -ne "Y" -and $response -ne "y") {
+        Write-Host ""
+        Write-Host "Please move the project to a shorter path and try again." -ForegroundColor Yellow
+        Read-Host "Press Enter to exit"
+        exit 1
+    }
+    Write-Host ""
+}
+
 # Check if CMake is installed
 $cmake = Get-Command cmake -ErrorAction SilentlyContinue
 if (-not $cmake) {
