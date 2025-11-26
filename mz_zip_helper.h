@@ -17,6 +17,9 @@ extern "C" {
 
 /***************************************************************************/
 
+/* Error code for user cancellation */
+#define MZ_USER_CANCELED          (-200)  /* Operation canceled by user */
+
 /* Compression level constants */
 #define MZ_HELPER_COMPRESS_LEVEL_DEFAULT    -1  /* Default compression */
 #define MZ_HELPER_COMPRESS_LEVEL_FAST        1  /* Fastest compression */
@@ -30,6 +33,27 @@ extern "C" {
 #define MZ_HELPER_COMPRESS_METHOD_LZMA      14  /* LZMA compression */
 #define MZ_HELPER_COMPRESS_METHOD_ZSTD      93  /* ZSTD compression */
 #define MZ_HELPER_COMPRESS_METHOD_XZ        95  /* XZ compression */
+
+/***************************************************************************/
+
+/* Progress callback return values */
+#define MZ_HELPER_PROGRESS_CONTINUE     0  /* Continue operation */
+#define MZ_HELPER_PROGRESS_CANCEL       1  /* Cancel operation */
+
+/**
+ * Progress callback function type
+ *
+ * @param userdata       User-defined data pointer
+ * @param current_file   Current file being processed
+ * @param bytes_done     Bytes processed for current file
+ * @param bytes_total    Total bytes for current file
+ * @param file_index     Index of current file (0-based)
+ * @param file_count     Total number of files
+ * @return MZ_HELPER_PROGRESS_CONTINUE to continue, MZ_HELPER_PROGRESS_CANCEL to cancel
+ */
+typedef int32_t (*mz_helper_progress_cb)(void *userdata, const char *current_file,
+                                         int64_t bytes_done, int64_t bytes_total,
+                                         int32_t file_index, int32_t file_count);
 
 /***************************************************************************/
 
@@ -116,6 +140,57 @@ typedef int32_t (*mz_helper_list_cb)(void *userdata, const char *filename,
 
 int32_t mz_helper_list_files(const char *zip_path, mz_helper_list_cb callback,
                              void *userdata);
+
+/***************************************************************************/
+/* Extended functions with progress callback and cancel support */
+/***************************************************************************/
+
+/**
+ * Compress a single file into a zip archive (with progress callback)
+ *
+ * @param zip_path       Path to the output zip file
+ * @param file_path      Path to the file to compress
+ * @param password       Password for encryption (NULL for no encryption)
+ * @param compress_level Compression level
+ * @param progress_cb    Progress callback function (NULL for no callback)
+ * @param userdata       User data passed to callback
+ * @return MZ_OK on success, MZ_USER_CANCELED if canceled, error code otherwise
+ */
+int32_t mz_helper_compress_file_ex(const char *zip_path, const char *file_path,
+                                   const char *password, int16_t compress_level,
+                                   mz_helper_progress_cb progress_cb, void *userdata);
+
+/**
+ * Compress a directory (recursively) into a zip archive (with progress callback)
+ *
+ * @param zip_path       Path to the output zip file
+ * @param dir_path       Path to the directory to compress
+ * @param include_path   1 to include the directory path in archive, 0 otherwise
+ * @param password       Password for encryption (NULL for no encryption)
+ * @param compress_level Compression level
+ * @param progress_cb    Progress callback function (NULL for no callback)
+ * @param userdata       User data passed to callback
+ * @return MZ_OK on success, MZ_USER_CANCELED if canceled, error code otherwise
+ */
+int32_t mz_helper_compress_directory_ex(const char *zip_path, const char *dir_path,
+                                        uint8_t include_path, const char *password,
+                                        int16_t compress_level,
+                                        mz_helper_progress_cb progress_cb, void *userdata);
+
+/**
+ * Extract a zip archive to a destination directory (with progress callback)
+ *
+ * @param zip_path       Path to the zip file to extract
+ * @param dest_dir       Destination directory (NULL for current directory)
+ * @param password       Password for decryption (NULL if not encrypted)
+ * @param overwrite      1 to overwrite existing files, 0 to skip
+ * @param progress_cb    Progress callback function (NULL for no callback)
+ * @param userdata       User data passed to callback
+ * @return MZ_OK on success, MZ_USER_CANCELED if canceled, error code otherwise
+ */
+int32_t mz_helper_extract_ex(const char *zip_path, const char *dest_dir,
+                             const char *password, uint8_t overwrite,
+                             mz_helper_progress_cb progress_cb, void *userdata);
 
 /***************************************************************************/
 
