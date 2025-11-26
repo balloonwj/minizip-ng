@@ -122,7 +122,8 @@ set(MINIZIP_SRC
     mz_strm_mem.c
     mz_strm_split.c
     mz_zip.c
-    mz_zip_rw.c)
+    mz_zip_rw.c
+    mz_zip_helper.c)
 
 # Initial header files
 set(MINIZIP_HDR
@@ -135,7 +136,8 @@ set(MINIZIP_HDR
     mz_strm_split.h
     mz_strm_os.h
     mz_zip.h
-    mz_zip_rw.h)
+    mz_zip_rw.h
+    mz_zip_helper.h)
 
 set(PC_PRIVATE_LIBS)
 set(PC_PRIVATE_DEPS)
@@ -811,6 +813,17 @@ if(MZ_BUILD_TESTS)
 
     if(NOT SKIP_INSTALL_BINARIES AND NOT SKIP_INSTALL_ALL)
         install(TARGETS minizip_cli RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif()
+
+    # Build helper example executable
+    add_executable(mz_zip_helper_example mz_zip_helper_example.c)
+    set_target_properties(mz_zip_helper_example PROPERTIES OUTPUT_NAME mz_zip_helper_example)
+    target_compile_definitions(mz_zip_helper_example PRIVATE ${STDLIB_DEF} ${MINIZIP_DEF})
+    target_include_directories(mz_zip_helper_example PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(mz_zip_helper_example ${MINIZIP_TARGET})
+
+    if(NOT SKIP_INSTALL_BINARIES AND NOT SKIP_INSTALL_ALL)
+        install(TARGETS mz_zip_helper_example RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
     endif()
 endif()
 
