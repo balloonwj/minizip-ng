@@ -825,6 +825,17 @@ if(MZ_BUILD_TESTS)
     if(NOT SKIP_INSTALL_BINARIES AND NOT SKIP_INSTALL_ALL)
         install(TARGETS mz_zip_helper_example RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
     endif()
+
+    # Build helper test executable
+    add_executable(mz_zip_helper_test mz_zip_helper_test.c)
+    set_target_properties(mz_zip_helper_test PROPERTIES OUTPUT_NAME mz_zip_helper_test)
+    target_compile_definitions(mz_zip_helper_test PRIVATE ${STDLIB_DEF} ${MINIZIP_DEF})
+    target_include_directories(mz_zip_helper_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+    target_link_libraries(mz_zip_helper_test ${MINIZIP_TARGET})
+
+    if(NOT SKIP_INSTALL_BINARIES AND NOT SKIP_INSTALL_ALL)
+        install(TARGETS mz_zip_helper_test RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+    endif()
 endif()
 
 if(MZ_BUILD_TESTS AND MZ_BUILD_UNIT_TESTS)
